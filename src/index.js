@@ -7,13 +7,14 @@ import {
   PanResponder,
   Dimensions,
   LayoutAnimation,
-  TouchableOpacity
+  TouchableOpacity,
+  StatusBar
 } from 'react-native';
 
 import SwipeIcon from './components/SwipeIcon';
-import images from '../../assets/images';
+import images from './assets/images';
 
-const MARGIN_TOP = Platform.OS === 'ios' ? 20 : 0;
+const MARGIN_TOP = Platform.OS === 'ios' ? 0 : StatusBar.currentHeight;
 const DEVICE_HEIGHT = Dimensions.get('window').height - MARGIN_TOP;
 type Props = {
   hasRef?: () => void,
@@ -82,7 +83,7 @@ export default class SwipeUpDown extends Component<Props> {
   }
 
   _onPanResponderMove(event, gestureState) {
-    if (gestureState.dy > 0 && !this.checkCollapsed) {
+    if (gestureState.dy > 0 && !this.checkCollapsed && !this.props.canScroll) {
       // SWIPE DOWN
 
       this.customStyle.style.top = this.top + gestureState.dy;
@@ -130,11 +131,11 @@ export default class SwipeUpDown extends Component<Props> {
   }
 
   showMini() {
-    const { onShowMini, itemMini } = this.props;
+    const { onShowMini, itemMini, swipeHeight } = this.props;
     this.customStyle.style.top = itemMini
-      ? DEVICE_HEIGHT - this.SWIPE_HEIGHT
+      ? DEVICE_HEIGHT - swipeHeight
       : DEVICE_HEIGHT;
-    this.customStyle.style.height = itemMini ? this.SWIPE_HEIGHT : 0;
+    this.customStyle.style.height = itemMini ? swipeHeight : 0;
     this.swipeIconRef && this.swipeIconRef.setState({ showIcon: false });
     this.updateNativeProps();
     !this.state.collapsed && this.setState({ collapsed: true });
@@ -143,7 +144,7 @@ export default class SwipeUpDown extends Component<Props> {
   }
 
   render() {
-    const { itemMini, itemFull, style } = this.props;
+    const { itemMini, itemFull, style, swipeHeight } = this.props;
     const { collapsed } = this.state;
     return (
       <View
@@ -152,17 +153,12 @@ export default class SwipeUpDown extends Component<Props> {
         style={[
           styles.wrapSwipe,
           {
-            height: this.SWIPE_HEIGHT,
             marginTop: MARGIN_TOP
           },
           !itemMini && collapsed && { marginBottom: -200 },
           style
         ]}
       >
-        <SwipeIcon
-          onClose={() => this.showMini()}
-          hasRef={ref => (this.swipeIconRef = ref)}
-        />
         {collapsed ? (
           itemMini ? (
             <TouchableOpacity
@@ -183,7 +179,6 @@ export default class SwipeUpDown extends Component<Props> {
 
 const styles = StyleSheet.create({
   wrapSwipe: {
-    padding: 10,
     backgroundColor: '#ccc',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
