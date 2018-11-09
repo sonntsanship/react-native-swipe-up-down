@@ -163,7 +163,7 @@ export default class SwipeUpDown extends Component<Props> {
           itemMini ? (
             <TouchableOpacity
               activeOpacity={this.disablePressToShow ? 1 : 0.6}
-              style={{ height: this.SWIPE_HEIGHT }}
+              style={{ height: this.props.swipeHeight || this.SWIPE_HEIGHT }}
               onPress={() => !this.disablePressToShow && this.showFull()}
             >
               {itemMini}
